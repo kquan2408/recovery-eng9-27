@@ -1,0 +1,789 @@
+<!-- ... existing code ... -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Digital Whiteboard - Montano School</title>
+    <style>
+        :root {
+            --azul-principal: #1269A8;
+            --amarillo-brillante: #F7D615;
+            --verde-grisaceo: #54887D;
+            --azul-claro: #88B5C7;
+            --verde-oliva: #A6B046;
+            --fondo-pizarra: #F2F5E9;
+            --texto-oscuro: #1A252C;
+            --blanco: #FFFFFF;
+            --sombra: rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--fondo-pizarra);
+            color: var(--texto-oscuro);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--azul-principal);
+            color: var(--blanco);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px var(--sombra);
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-brand img {
+            height: 48px;
+            background-color: var(--blanco);
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .header-title h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--amarillo-brillante);
+        }
+
+        .header-title p {
+            font-size: 0.85rem;
+            color: var(--azul-claro);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-fullscreen {
+            background-color: var(--amarillo-brillante);
+            color: var(--azul-principal);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-fullscreen:hover {
+            background-color: var(--blanco);
+            transform: scale(1.03);
+        }
+
+        /* Top Lesson Selector */
+        .lesson-selector {
+            background-color: var(--verde-grisaceo);
+            padding: 8px 24px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            overflow-x: auto;
+            color: var(--blanco);
+        }
+
+        .lesson-selector label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .lesson-selector select {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--azul-claro);
+            background-color: var(--blanco);
+            color: var(--texto-oscuro);
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* Institutional Info Panel */
+        .info-bar {
+            background-color: var(--blanco);
+            padding: 12px 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            border-bottom: 2px solid var(--azul-claro);
+            font-size: 0.85rem;
+        }
+
+        .info-card {
+            background-color: #F8FAF6;
+            padding: 8px 12px;
+            border-left: 4px solid var(--azul-principal);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .info-card.habit {
+            border-left-color: var(--verde-oliva);
+        }
+
+        .info-card.competence {
+            border-left-color: var(--amarillo-brillante);
+        }
+
+        .info-card strong {
+            display: block;
+            color: var(--azul-principal);
+            margin-bottom: 2px;
+        }
+
+        /* Learning Stage Navigation Tabs */
+        .tabs-container {
+            display: flex;
+            background-color: var(--azul-claro);
+            padding: 8px 24px 0 24px;
+            gap: 6px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 10px 18px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border: none;
+            border-radius: 8px 8px 0 0;
+            font-weight: 700;
+            color: var(--azul-principal);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .tab-btn.active {
+            background-color: var(--fondo-pizarra);
+            color: var(--azul-principal);
+            border-top: 3px solid var(--amarillo-brillante);
+        }
+
+        .tab-badge {
+            background-color: var(--azul-principal);
+            color: var(--blanco);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        .tab-btn.active .tab-badge {
+            background-color: var(--verde-oliva);
+        }
+
+        /* Main Whiteboard Area */
+        main {
+            flex: 1;
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .tab-content {
+            display: none;
+            background-color: var(--blanco);
+            padding: 24px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 12px var(--sombra);
+            min-height: 450px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pedagogical Components */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--fondo-pizarra);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            color: var(--azul-principal);
+            font-size: 1.4rem;
+        }
+
+        .time-tag {
+            background-color: var(--amarillo-brillante);
+            color: var(--texto-oscuro);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #FAFAFA;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 18px;
+            box-shadow: 0 2px 4px var(--sombra);
+        }
+
+        .card-header {
+            font-weight: bold;
+            color: var(--azul-principal);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* CEFR Badges */
+        .cefr-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .cefr-card {
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid var(--azul-principal);
+            background-color: #F4F8FA;
+        }
+
+        .cefr-card.a1 { border-left-color: var(--verde-oliva); }
+        .cefr-card.a2 { border-left-color: var(--azul-claro); }
+        .cefr-card.b1 { border-left-color: var(--azul-principal); }
+
+        .cefr-title {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Accordion / Hidden Solutions */
+        .accordion {
+            margin-top: 15px;
+            border: 1px solid var(--azul-claro);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .accordion-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--azul-claro);
+            color: var(--azul-principal);
+            border: none;
+            text-align: left;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-content {
+            padding: 15px;
+            background-color: #FFF;
+            display: none;
+            border-top: 1px solid var(--azul-claro);
+        }
+
+        .accordion-content.open {
+            display: block;
+        }
+
+        /* Checklist / Rubric Table */
+        .rubric-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .rubric-table th, .rubric-table td {
+            border: 1px solid #DDD;
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        .rubric-table th {
+            background-color: var(--azul-principal);
+            color: var(--blanco);
+        }
+
+        .rubric-table tr:nth-child(even) {
+            background-color: #F9F9F9;
+        }
+
+        .score-input {
+            width: 50px;
+            padding: 4px;
+            border: 1px solid #CCC;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--texto-oscuro);
+            color: var(--blanco);
+            text-align: center;
+            padding: 12px;
+            font-size: 0.8rem;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header with Montano Branding -->
+    <header>
+        <div class="header-brand">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyEop0yf6lZ7Jk9MILZxF1rBj4Oqs5esyhIQ&s" alt="Montano School Logo">
+            <div class="header-title">
+                <h1>INTERACTIVE DIGITAL WHITEBOARD</h1>
+                <p>Colegio Montano Educational Model | Guatemala CNB Framework</p>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="btn-fullscreen" onclick="toggleFullscreen()">
+                <span id="fs-icon">⛶</span> Fullscreen
+            </button>
+        </div>
+    </header>
+
+    <!-- Lesson Plan Selector -->
+    <div class="lesson-selector">
+        <label for="class-select">📅 Select Class / Lesson Plan:</label>
+        <select id="class-select" onchange="loadClassData(this.value)">
+            <optgroup label="WEEK 1: Building Strong Sentences">
+                <option value="c1" selected>Class 1: Sentence Structure & Getting to Know Each Other</option>
+                <option value="c2">Class 2: Independent and Dependent Clauses</option>
+                <option value="c3">Class 3: Sentence Structure in Context (Fragments & Run-ons)</option>
+                <option value="c4">Class 4: Clauses in Paragraph Writing</option>
+                <option value="c5">Class 5: Weekly Review & Short Quiz 1</option>
+            </optgroup>
+            <optgroup label="WEEK 2: Describing Actions & Details">
+                <option value="c6">Class 6: Frequency Adverbs & Word Order</option>
+                <option value="c7">Class 7: Prepositional Phrases (Time & Place)</option>
+                <option value="c8">Class 8: Adjective and Adverb Phrases</option>
+                <option value="c9">Class 9: Grammar Review in Context</option>
+                <option value="c10">Class 10: Weekly Review & Short Quiz 2</option>
+            </optgroup>
+            <optgroup label="WEEK 3: Verbs and Pronouns">
+                <option value="c11">Class 11: Present Perfect & Life Experiences</option>
+                <option value="c12">Class 12: Present Progressive vs. Present Simple</option>
+                <option value="c13">Class 13: Present Perfect vs. Present Progressive</option>
+                <option value="c14">Class 14: Subject-Verb Agreement & Pronoun Case</option>
+                <option value="c15">Class 15: Weekly Review & Short Quiz 3</option>
+            </optgroup>
+            <optgroup label="WEEK 4: Conditionals & Voice">
+                <option value="c16">Class 16: First Conditional (Real Future)</option>
+                <option value="c17">Class 17: Second Conditional (Hypothetical)</option>
+                <option value="c18">Class 18: Active and Passive Voice</option>
+                <option value="c19">Class 19: Integrated Grammar Review</option>
+                <option value="c20">Class 20: Final Evaluation</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <!-- Institutional Pedagogical Panel -->
+    <div class="info-bar">
+        <div class="info-card">
+            <strong>Course & Grade:</strong>
+            <span id="info-course">English | 9th Grade (Recovery)</span>
+        </div>
+        <div class="info-card">
+            <strong>Teacher:</strong>
+            <span>Ms. Karla Quan</span>
+        </div>
+        <div class="info-card habit">
+            <strong>Montano Habit:</strong>
+            <span id="info-habit">1. Be Proactive / 2. Begin with the End in Mind</span>
+        </div>
+        <div class="info-card competence">
+            <strong>Key Competencies (CNB):</strong>
+            <span id="info-competence">Critical Thinking, Communication & Teamwork</span>
+        </div>
+    </div>
+
+    <!-- Learning Stage Tabs -->
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('tab1')">
+            <span>I. Motivational Warm-Up</span>
+            <span class="tab-badge">~8 min</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab2')">
+            <span>II. Individual Work / Explanation</span>
+            <span class="tab-badge">~42 min</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab3')">
+            <span>III. Cooperative Group Work</span>
+            <span class="tab-badge">~30 min</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab4')">
+            <span>IV. Plenary & Assessment</span>
+            <span class="tab-badge">~10 min</span>
+        </button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main>
+
+        <!-- TAB I: MOTIVATIONAL WARM-UP -->
+        <div id="tab1" class="tab-content active">
+            <div class="section-header">
+                <h2>Stage I: Motivational Introduction & Initial Challenge</h2>
+                <span class="time-tag">Duration: 8 Minutes</span>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">💡 Warm-up Activity / Icebreaker</div>
+                    <p id="t1-actividad"><strong>Activity:</strong> "Find Someone Who..."</p>
+                    <p style="margin-top: 8px;" id="t1-descripcion">
+                        Students move around the room with a quick checklist to activate prior vocabulary and interact with classmates in English.
+                    </p>
+                </div>
+                <div class="card">
+                    <div class="card-header">📌 Whiteboard Prompts for Students</div>
+                    <ul id="t1-prompts" style="margin-left: 20px; line-height: 1.6;">
+                        <li>Find someone who likes music.</li>
+                        <li>Find someone who plays a sport.</li>
+                        <li>Find someone who enjoys reading.</li>
+                        <li>Find someone who speaks more than one language.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB II: INDIVIDUAL WORK & EXPLANATION -->
+        <div id="tab2" class="tab-content">
+            <div class="section-header">
+                <h2>Stage II: Brief Explanation & Individual Work</h2>
+                <span class="time-tag">Explanation: 12 min | Practice: 30 min</span>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">📘 Direct Instruction (Grammar Key)</div>
+                    <div id="t2-explicacion">
+                        <p><strong>Basic Sentence Structure:</strong> Subject + Verb + Complement</p>
+                        <p style="margin-top: 8px;">Differentiating complete sentences (full thoughts) from fragments.</p>
+                    </div>
+
+                    <!-- Answer Key Accordion -->
+                    <div class="accordion">
+                        <button class="accordion-btn" onclick="toggleAccordion('acc1')">
+                            <span>👁️ View Answer Key / Guided Solution</span>
+                            <span>▼</span>
+                        </button>
+                        <div id="acc1" class="accordion-content">
+                            <p><strong>Suggested Solution:</strong></p>
+                            <p id="t2-solucion">Subject = Performs the action | Verb = Action or state | Complement = Additional detailed information.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">🎯 CEFR Differentiation (A1 – B1)</div>
+                    <div class="cefr-group">
+                        <div class="cefr-card a1">
+                            <div class="cefr-title">A1 Level (Beginner)</div>
+                            <p id="t2-a1">Word bank and guided templates: <i>"My name is... I like..."</i> Identify basic subject and verb.</p>
+                        </div>
+                        <div class="cefr-card a2">
+                            <div class="cefr-title">A2 Level (Elementary)</div>
+                            <p id="t2-a2">Complete sentences using basic connectors and write 8 original sentences about daily routines.</p>
+                        </div>
+                        <div class="cefr-card b1">
+                            <div class="cefr-title">B1 Level (Intermediate)</div>
+                            <p id="t2-b1">Construct short independent paragraphs using subordinating conjunctions and complex sentence structures.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB III: COOPERATIVE WORK -->
+        <div id="tab3" class="tab-content">
+            <div class="section-header">
+                <h2>Stage III: Cooperative / Pair & Group Work</h2>
+                <span class="time-tag">Duration: 30 Minutes</span>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">👥 Group / Pair Challenge</div>
+                    <p id="t3-instrucciones">
+                        In pairs, students analyze draft sentences, correct syntax errors, and combine simple sentences to form complex ideas.
+                    </p>
+                    <div style="margin-top: 15px; background: #FFF; padding: 12px; border-radius: 6px; border: 1px dashed var(--azul-principal);">
+                        <strong>Suggested Roles:</strong>
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li><strong>Reader/Editor:</strong> Checks grammar and subject-verb agreement.</li>
+                            <li><strong>Speaker/Spokesperson:</strong> Presents final results during the plenary.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">🤝 Montano Habit in Action</div>
+                    <p><strong>Synergize & Seek First to Understand, Then to Be Understood:</strong></p>
+                    <p style="margin-top: 8px;">
+                        Listen constructively to grammar feedback proposed by team partners before finalizing team outputs.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB IV: PLENARY & ASSESSMENT -->
+        <div id="tab4" class="tab-content">
+            <div class="section-header">
+                <h2>Stage IV: Plenary, Wrap-up & Formative Assessment</h2>
+                <span class="time-tag">Duration: 10 Minutes</span>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px;">
+                <div class="card-header">🎤 Plenary Dynamics</div>
+                <p id="t4-plenaria">
+                    Volunteers and selected teams share their constructed sentences on the board. The class collectively identifies Subject, Verb, and Complement, validating corrections in real time.
+                </p>
+            </div>
+
+            <!-- Teacher Checklist / Rubric -->
+            <div class="card">
+                <div class="card-header">📊 Plenary Checklist / Assessment Rubric (Colegio Montano)</div>
+                <table class="rubric-table">
+                    <thead>
+                        <tr>
+                            <th>Evaluation Criterion</th>
+                            <th>Max Score</th>
+                            <th>Team / Student</th>
+                            <th>Teacher Feedback / Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1. Topic Mastery & Correct Sentence Structure</td>
+                            <td><input type="number" class="score-input" value="1.0" max="1.0" step="0.1"></td>
+                            <td><input type="text" style="width: 100%; border: none; outline: none;" placeholder="Team #"></td>
+                            <td><input type="text" style="width: 100%; border: none; outline: none;" placeholder="Teacher notes..."></td>
+                        </tr>
+                        <tr>
+                            <td>2. Clarity in Explanation & Error Correction</td>
+                            <td><input type="number" class="score-input" value="1.0" max="1.0" step="0.1"></td>
+                            <td><input type="text" style="width: 100%; border: none; outline: none;" placeholder="Team #"></td>
+                            <td><input type="text" style="width: 100%; border: none; outline: none;" placeholder="Teacher notes..."></td>
+                        </tr>
+                        <tr>
+                            <td>3. Collaborative Work & Application of Montano Habits</td>
+                            <td><input type="number" class="score-input" value="1.0" max="1.0" step="0.1"></td>
+                            <td><input type="text" style="width: 100%; border: none; outline: none;" placeholder="Team #"></td>
+                            <td><input type="text" style="width: 100%; border: none; outline: none;" placeholder="Teacher notes..."></td>
+                        </tr>
+                        <tr>
+                            <td>4. Active Participation & Level-Appropriate Fluency</td>
+                            <td><input type="number" class="score-input" value="1.0" max="1.0" step="0.1"></td>
+                            <td><input type="text" style="width: 100%; border: none; outline: none;" placeholder="Team #"></td>
+                            <td><input type="text" style="width: 100%; border: none; outline: none;" placeholder="Teacher notes..."></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        Colegio Montano &copy; 2026 | Interactive Pedagogical Assistant - Daily Lesson Plan
+    </footer>
+
+    <!-- Interactive Data Script -->
+    <script>
+        // Lesson Plan Data for 20 Classes (9th Grade Recovery)
+        const lessonData = {
+            "c1": {
+                course: "English | 9th Grade (Recovery)",
+                habit: "1. Be Proactive / 2. Begin with the End in Mind",
+                competence: "Identifies sentence components and constructs simple sentences accurately.",
+                t1_act: "Find Someone Who...",
+                t1_desc: "Icebreaker activity to activate prior knowledge and interact using basic personal sentence structures.",
+                t1_prompts: ["Find someone who likes music.", "Find someone who plays a sport.", "Find someone who enjoys reading.", "Find someone who speaks more than one language."],
+                t2_exp: "<p><strong>Basic Structure:</strong> Subject + Verb + Complement.</p><p>Distinguishing complete sentences from fragment clauses lacking a subject or verb.</p>",
+                t2_sol: "Example: [Subject: She] + [Verb: plays] + [Complement: the guitar].",
+                a1: "Use image guides and basic subject/verb completion worksheets.",
+                a2: "Write 8 complete sentences describing daily activities.",
+                a3: "Construct short paragraphs incorporating sentence variety and connectors.",
+                t3_inst: "Pairs identify and classify subjects, verbs, and complements from scrambled sentence cards.",
+                t4_ple: "Volunteers read sentences aloud while the class validates grammar components on the board."
+            },
+            "c2": {
+                course: "English | 9th Grade (Recovery)",
+                habit: "3. Put First Things First",
+                competence: "Distinguishes between independent and dependent clauses.",
+                t1_act: "Complete or Incomplete Thought?",
+                t1_desc: "Teacher presents sentence starters on screen. Students determine if the thought is complete or dependent.",
+                t1_prompts: ["Because I was tired...", "I stayed home.", "When the bell rang...", "We finished the exam."],
+                t2_exp: "<p><strong>Independent Clause:</strong> Expresses a complete thought.</p><p><strong>Dependent Clause:</strong> Requires additional context. Connectors: <i>because, although, when, if</i>.</p>",
+                t2_sol: "'Because I was tired' = Dependent | 'I stayed home' = Independent.",
+                a1: "Underline subordinating conjunctions (because, when) on guided worksheets.",
+                a2: "Match independent clauses with appropriate dependent clauses.",
+                b1: "Write complex sentences changing clause positioning and punctuation.",
+                t3_inst: "Pairs receive 5 dependent clauses and create original matching independent clauses.",
+                t4_ple: "Oral sharing of combined sentences created during pair work."
+            },
+            "c6": {
+                course: "English | 9th Grade (Recovery)",
+                habit: "7. Sharpen the Saw",
+                competence: "Applies frequency adverbs in the correct grammatical position.",
+                t1_act: "Habit Survey",
+                t1_desc: "Quick warm-up questions about student habits (e.g., How often do you exercise?).",
+                t1_prompts: ["How often do you read?", "How often do you play video games?", "How often do you study English?"],
+                t2_exp: "<p><strong>Placement:</strong> Before main verbs, but AFTER the verb <i>to be</i>.</p><p>Examples: <i>I ALWAYS study / She IS ALWAYS happy.</i></p>",
+                t2_sol: "Always (100%), Usually (80%), Often (60%), Sometimes (40%), Rarely (20%), Never (0%).",
+                a1: "Unscramble sentence strips with visual frequency guides.",
+                a2: "Write a short paragraph about weekly routines using at least 4 frequency adverbs.",
+                b1: "Interview a partner and write a comparative routine summary.",
+                t3_inst: "In pairs, create a visual bar chart comparing habit frequencies.",
+                t4_ple: "Sharing routines aloud while maintaining correct adverb placement."
+            },
+            "c11": {
+                course: "English | 9th Grade (Recovery)",
+                habit: "4. Think Win-Win",
+                competence: "Uses Present Perfect to communicate relevant life experiences.",
+                t1_act: "Have You Ever...?",
+                t1_desc: "Interactive question prompt regarding past life experiences.",
+                t1_prompts: ["Have you ever traveled to another city?", "Have you ever tried a new sport?", "Have you ever won a prize?"],
+                t2_exp: "<p><strong>Structure:</strong> Have / Has + Past Participle.</p><p>Key indicators: <i>ever, never, already, yet, just</i>.</p>",
+                t2_sol: "Subject + have/has + Participle (e.g., I have visited / He has written).",
+                a1: "Use irregular verb charts to complete participle sentence stems.",
+                a2: "Formulate 5 interview questions for classmates.",
+                b1: "Conduct follow-up questions using Past Simple for specific details.",
+                t3_inst: "Pair interview: Find a classmate who has had unique experiences.",
+                t4_ple: "Students report one interesting experience discovered about their partner."
+            },
+            "c16": {
+                course: "English | 9th Grade (Recovery)",
+                habit: "6. Synergize",
+                competence: "Expresses real future possibilities using the First Conditional.",
+                t1_act: "If... Then...",
+                t1_desc: "Complete conditional prompts presented on the main screen.",
+                t1_prompts: ["If it rains tomorrow...", "If I study hard...", "If we win the game..."],
+                t2_exp: "<p><strong>First Conditional:</strong> If + Present Simple, WILL + base verb.</p><p>Expresses real or likely future possibilities.",
+                t2_sol: "If I study (Present), I will pass (Will + base) the test.",
+                a1: "Match cause and result clauses using color-coded cards.",
+                a2: "Complete unfinished conditional sentences.",
+                b1: "Create a chain conditional story (If X happens, Y will happen...).",
+                t3_inst: "In groups of 3, write a 5-step cause-and-effect conditional chain.",
+                t4_ple: "Group presentation of conditional chains to the class."
+            }
+        };
+
+        // Function to switch tabs
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Function to toggle answer accordion
+        function toggleAccordion(accId) {
+            const content = document.getElementById(accId);
+            content.classList.toggle('open');
+        }
+
+        // Function for Fullscreen Mode
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error enabling fullscreen mode: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // Load dynamic data for selected class
+        function loadClassData(classId) {
+            const data = lessonData[classId] || lessonData["c1"];
+
+            document.getElementById('info-course').innerText = data.course;
+            document.getElementById('info-habit').innerText = data.habit;
+            document.getElementById('info-competence').innerText = data.competence;
+
+            // Tab 1
+            document.getElementById('t1-actividad').innerHTML = `<strong>Activity:</strong> ${data.t1_act}`;
+            document.getElementById('t1-descripcion').innerText = data.t1_desc;
+            
+            const promptList = document.getElementById('t1-prompts');
+            promptList.innerHTML = '';
+            data.t1_prompts.forEach(p => {
+                const li = document.createElement('li');
+                li.innerText = p;
+                promptList.appendChild(li);
+            });
+
+            // Tab 2
+            document.getElementById('t2-explicacion').innerHTML = data.t2_exp;
+            document.getElementById('t2-solucion').innerHTML = data.t2_sol;
+            document.getElementById('t2-a1').innerText = data.a1;
+            document.getElementById('t2-a2').innerText = data.a2;
+            document.getElementById('t2-b1').innerText = data.a3 || data.b1;
+
+            // Tab 3
+            document.getElementById('t3-instrucciones').innerText = data.t3_inst;
+
+            // Tab 4
+            document.getElementById('t4-plenaria').innerText = data.t4_ple;
+        }
+
+        // Initial setup
+        window.onload = function() {
+            loadClassData("c1");
+        };
+    </script>
+</body>
+</html>
